@@ -1,0 +1,73 @@
+-- ดึง RemoteEvent มารอไว้ก่อนเพื่อลดความแลค
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local damageBlockEvent = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("DamageBlock")
+
+-- โหลด Rayfield UI
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/UI-Interface/CustomFIeld/main/RayField.lua'))()
+
+-- สร้างหน้าต่าง UI
+local Window = Rayfield:CreateWindow({
+   Name = "Damage Block Script",
+   LoadingTitle = "Loading...",
+   LoadingSubtitle = "Auto Farm Script",
+   ConfigurationSaving = {
+      Enabled = false,
+      FolderName = nil,
+      FileName = "AutoDamageBlock"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "", 
+      RememberJoins = true 
+   },
+   KeySystem = false -- ปิดระบบ Key เพื่อให้ใช้งานได้เลย
+})
+
+-- สร้างแท็บเมนู
+local Tab = Window:CreateTab("Main", 4483362458) 
+
+-- สร้าง Section
+local Section = Tab:CreateSection("Damage Block Features")
+
+-- 1. สร้างปุ่มแบบกดทีละครั้ง
+local Button = Tab:CreateButton({
+   Name = "Hit Damage Block (ตี 1 ครั้ง)",
+   Info = "กดเพื่อส่งคำสั่งตี 1 ครั้ง",
+   Interact = 'Click',
+   Callback = function()
+       -- เรียกใช้ฟังก์ชันตีเมื่อกดปุ่ม
+       damageBlockEvent:FireServer()
+   end,
+})
+
+-- ตัวแปรสำหรับเช็คการเปิดออโต้
+local autoDamage = false
+
+-- 2. สร้างปุ่มแบบเปิด-ปิด (Auto)
+local Toggle = Tab:CreateToggle({
+   Name = "Auto Damage Block (ออโต้ตี)",
+   Info = "เปิดเพื่อส่งคำสั่งตีรัวๆ",
+   CurrentValue = false,
+   Flag = "AutoDamageToggle",
+   Callback = function(Value)
+      autoDamage = Value
+      
+      -- ถ้าเปิด (Value = true) ให้เริ่มลูปออโต้
+      if autoDamage then
+          task.spawn(function()
+              while autoDamage do
+                  damageBlockEvent:FireServer()
+                  task.wait(0.01) -- ใส่ดีเลย์เล็กน้อยกันเกมเด้ง (ปรับค่าน้อย-มากได้)
+              end
+          end)
+      end
+   end,
+})
+
+-- แจ้งเตือนเมื่อสคริปต์โหลดเสร็จ
+Rayfield:Notify({
+    Title = "Script Loaded!",
+    Content = "พร้อมใช้งานแล้ว",
+    Duration = 3,
+    Image = 4483362458,
+})
